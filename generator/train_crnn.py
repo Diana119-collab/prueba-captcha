@@ -183,7 +183,8 @@ def report(rows):
 # ---------------------------------------------------------------- modos
 def eval_dir(model, d, device):
     key = json.load(open(os.path.join(d, "key.json")))
-    Xte = np.stack([to_array(Image.open(os.path.join(d, "imgs", it["id"] + ".png")).convert("RGB")) for it in key])
+    sub = "imgs" if os.path.isdir(os.path.join(d, "imgs")) else ""  # dataset/library has the PNGs next to key.json
+    Xte = np.stack([to_array(Image.open(os.path.join(d, sub, it["id"] + ".png")).convert("RGB")) for it in key])
     preds = predict(model, Xte, CHARS_SYN, device)
     return [dict(id=it["id"], nivel=it["nivel"], verdad=it["verdad"], pred=p, exacto=int(p == it["verdad"]))
             for it, p in zip(key, preds)]
@@ -193,7 +194,7 @@ def mode_synthetic(a, device):
     print(f"Generando {a.n_train} CAPTCHAs de entrenamiento...", flush=True)
     Xtr, ytr = gen_dataset(a.n_train, seed0=10_000_000)  # semillas distintas a las de prueba
     model = train(Xtr, ytr, CHARS_SYN, a.epochs, device)
-    for d, out in [(a.test_dir, "resultados_crnn.csv")] + ([(a.env_dir, "resultados_crnn_envs.csv")] if a.env_dir else []):
+    for d, out in [(a.test_dir, "resultados_crnn.csv")] + ([(a.env_dir, "resultados_crnn_envs.csv")] if a.env_dir else []) + ([(a.lib_dir, "resultados_crnn_library.csv")] if a.lib_dir else []):
         rows = eval_dir(model, d, device)
         with open(out, "w", newline="") as f:
             w = csv.DictWriter(f, fieldnames=rows[0].keys()); w.writeheader(); w.writerows(rows)
@@ -234,6 +235,7 @@ if __name__ == "__main__":
     ap.add_argument("--test_dir", default="prueba_200")
     ap.add_argument("--real_dir", default=None)
     ap.add_argument("--env_dir", default=None, help="carpeta con imgs/ y key.json de entornos nuevos (E1,E2,E3)")
+    ap.add_argument("--lib_dir", default=None, help="folder with the django-simple-captcha images + key.json (dataset/library)")
     ap.add_argument("--n_train", type=int, default=20000)
     ap.add_argument("--epochs", type=int, default=30)
     ap.add_argument("--selftest", action="store_true")
