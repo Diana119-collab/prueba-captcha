@@ -27,5 +27,5 @@ Online human test: https://diana119-collab.github.io/prueba-captcha/ (`index.htm
 All images: 32-symbol alphabet (no I, O, 0, 1), 5 characters (6 in E2), 310×80 px (370×80 in E2).
 
 ## Notes
-- CRNN training is not seeded; two 60-epoch runs gave different accuracies (see `crnn_levels_run1.csv`, `crnn_levels_run2.csv`).
+- CRNN training is not seeded; three 60-epoch runs gave different accuracies on the levels (67/200, 33/200 and 83/200: `crnn_levels_run1.csv`, `run2`, `run3`). The reported numbers (abstract and poster) are from run 3, which is the only run that also covers the library set (`crnn_library_run3.csv`) and the environments (`crnn_environments_run3.csv`).
 - Synthetic CAPTCHAs only; no real site was accessed.
