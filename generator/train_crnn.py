@@ -191,15 +191,33 @@ def eval_dir(model, d, device):
 
 
 def mode_synthetic(a, device):
+    import torch
     print(f"Generando {a.n_train} CAPTCHAs de entrenamiento...", flush=True)
     Xtr, ytr = gen_dataset(a.n_train, seed0=10_000_000)  # semillas distintas a las de prueba
-    model = train(Xtr, ytr, CHARS_SYN, a.epochs, device)
-    for d, out in [(a.test_dir, "resultados_crnn.csv")] + ([(a.env_dir, "resultados_crnn_envs.csv")] if a.env_dir else []) + ([(a.lib_dir, "resultados_crnn_library.csv")] if a.lib_dir else []):
-        rows = eval_dir(model, d, device)
-        with open(out, "w", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=rows[0].keys()); w.writeheader(); w.writerows(rows)
-        report(rows)
-        print("Guardado:", out)
+    seeds = [int(x) for x in a.seeds.split(",")] if a.seeds else [None]
+    targets = [(a.test_dir, "crnn_levels")] + ([(a.env_dir, "crnn_environments")] if a.env_dir else []) \
+              + ([(a.lib_dir, "crnn_library")] if a.lib_dir else []) + ([(a.lib2_dir, "crnn_library2")] if a.lib2_dir else [])
+    summary = []
+    for sd in seeds:
+        if sd is not None:  # seed initialisation and data order; the training images are the same in every run
+            random.seed(sd); np.random.seed(sd); torch.manual_seed(sd)
+            if torch.cuda.is_available(): torch.cuda.manual_seed_all(sd)
+        tag = "" if sd is None else f"_seed{sd}"
+        print(f"\n=== Entrenamiento (semilla {sd}) ===", flush=True)
+        model = train(Xtr, ytr, CHARS_SYN, a.epochs, device)
+        line = {"seed": sd}
+        for d, base in targets:
+            rows = eval_dir(model, d, device)
+            out = f"{base}{tag}.csv"
+            with open(out, "w", newline="") as f:
+                w = csv.DictWriter(f, fieldnames=rows[0].keys()); w.writeheader(); w.writerows(rows)
+            report(rows)
+            line[base] = sum(r["exacto"] for r in rows)
+            print("Guardado:", out)
+        summary.append(line)
+        with open("crnn_summary.csv", "w", newline="") as f:  # rewritten after every run, so nothing is lost if Colab stops
+            w = csv.DictWriter(f, fieldnames=summary[0].keys()); w.writeheader(); w.writerows(summary)
+        print("Resumen hasta ahora:", summary, flush=True)
 
 
 def mode_real(a, device):
@@ -236,6 +254,8 @@ if __name__ == "__main__":
     ap.add_argument("--real_dir", default=None)
     ap.add_argument("--env_dir", default=None, help="carpeta con imgs/ y key.json de entornos nuevos (E1,E2,E3)")
     ap.add_argument("--lib_dir", default=None, help="folder with the django-simple-captcha images + key.json (dataset/library)")
+    ap.add_argument("--lib2_dir", default=None, help="second real-library set (dataset/library2)")
+    ap.add_argument("--seeds", default=None, help="comma-separated seeds, e.g. 1,2,3,4,5: one training run per seed")
     ap.add_argument("--n_train", type=int, default=20000)
     ap.add_argument("--epochs", type=int, default=30)
     ap.add_argument("--selftest", action="store_true")
