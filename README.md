@@ -2,7 +2,7 @@
 
 Generator, dataset and results for the poster/extended abstract *"Can Current AI Solve CAPTCHAs? What It Says About Machine Intelligence"* (WAIMLAp 2026).
 
-Online human test: https://diana119-collab.github.io/prueba-captcha/ (`index.html`).
+Online human test: https://diana119-collab.github.io/prueba-captcha/ (`index.html`): main menu with four tests (`?set=niveles`, `?set=entornos`, `?set=libreria`, `?set=libreria2`).
 
 ## Contents
 - `generator/` – Python (Pillow) CAPTCHA generator and solvers.

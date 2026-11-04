@@ -38,12 +38,29 @@ input[type=text]{width:100%;background:var(--bg);border:1px solid var(--line);bo
 textarea{width:100%;min-height:8.5rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;font-family:var(--mono);font-size:.8rem;word-break:break-all}
 .note{font-size:.92rem;color:var(--muted)}
 label.label{display:block;margin-bottom:6px}
+.menu{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:inherit;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:12px 14px}
+.opt b{font-size:1.05rem}.opt span{font-size:.92rem;color:var(--muted)}.opt:hover,.opt:focus-visible{border-color:var(--accent);outline:none}
+.opt.done b::after{content:' ✓';color:var(--accent)}
+a.back{font-size:.92rem;color:var(--muted)}
 </style>
 </head>
 <body>
 
 <main>
- <section id="intro" class="panel">
+ <section id="menu" class="panel" hidden>
+  <span class="label">Estudio breve · elige una prueba</span>
+  <h1>Pruebas CAPTCHA</h1>
+  <p>Lee el texto de imágenes CAPTCHA y escríbelo. Puedes hacer una sola prueba o las cuatro; cada una da un código distinto. <b>Usa el mismo nombre en todas.</b></p>
+  <div class="menu">
+   <a class="opt" data-k="niveles" href="?set=niveles"><b>1. Cinco niveles de dificultad</b><span>30 imágenes de 5 caracteres · 5 a 8 minutos</span></a>
+   <a class="opt" data-k="entornos" href="?set=entornos"><b>2. Entornos nuevos</b><span>30 imágenes de 5 o 6 caracteres · 5 a 8 minutos</span></a>
+   <a class="opt" data-k="libreria" href="?set=libreria"><b>3. Librería real: letras</b><span>20 imágenes de 4 letras · unos 4 minutos</span></a>
+   <a class="opt" data-k="libreria2" href="?set=libreria2"><b>4. Librería real: dígitos</b><span>20 imágenes de 4 dígitos, difíciles · unos 4 minutos</span></a>
+  </div>
+  <p class="note"><b>Solo participan personas mayores de 18 años.</b> Se usan solo en este trabajo académico; en el trabajo solo se reportan resultados del grupo, sin nombres.</p>
+ </section>
+ <section id="intro" class="panel" hidden>
   <span class="label">Estudio breve · 5 a 8 minutos</span>
   <h1>Prueba CAPTCHA</h1>
   <p>Verás 30 imágenes con 5 caracteres cada una. Escribe lo que lees y pulsa <b>Siguiente</b>. Se mide tu acierto y el tiempo que tardas en cada imagen.</p>
@@ -58,6 +75,7 @@ label.label{display:block;margin-bottom:6px}
   <div><label class="label" for="page">Edad</label><input type="text" id="page" inputmode="numeric" autocomplete="off" maxlength="3" placeholder="Ej.: 25"></div>
   <p class="note" id="err" role="alert" hidden style="color:var(--warn)"></p>
   <button class="primary" id="start" type="button">Empezar</button>
+  <a class="back" href="?">← Volver al menú</a>
  </section>
 
  <section id="task" class="panel" hidden>
@@ -77,6 +95,7 @@ label.label{display:block;margin-bottom:6px}
   <p>Copia este código y envíaselo a la persona que te pidió participar. Contiene tu nombre, tu edad, tus respuestas y tus tiempos.</p>
   <textarea id="code" readonly aria-label="Código de resultados"></textarea>
   <div class="row"><button class="primary" id="copy" type="button">Copiar código</button><span id="copied" class="note" role="status"></span></div>
+  <a class="back" href="?">← Volver al menú para hacer otra prueba</a>
  </section>
 </main>
 <script>
@@ -107,6 +126,26 @@ if (LIB2) { Object.assign(IMGS, IMGS4); ORDER = ORDER4;
   $('ans').maxLength = 4; $('img').alt = 'Imagen CAPTCHA con 4 dígitos';
   document.querySelector('#task .note').textContent = '4 dígitos. En blanco si no puedes leerla.'; }
 
+const SETKEY = LIB2 ? 'libreria2' : LIB ? 'libreria' : ENV ? 'entornos' : (new URLSearchParams(location.search).get('set') === 'niveles' ? 'niveles' : '');
+const NOTE = '<b>Solo participan personas mayores de 18 años.</b> Tu nombre y tu edad se incluirán en el código final que enviarás. Se usan solo en este trabajo académico, y en el trabajo solo se reportan resultados del grupo, sin nombres.';
+const RULES = {
+  niveles: ['Solo hay <b>letras mayúsculas y números del 2 al 9</b>. Nunca aparecen O, I, 0 ni 1.', 'No importa si escribes en mayúscula o minúscula.', 'Si no logras leerla, déjala en blanco y sigue. No adivines al azar.', 'No uses ayuda externa ni zoom con otras herramientas. Hazlo de corrido, sin pausas.'],
+  entornos: ['Solo hay <b>letras mayúsculas y números del 2 al 9</b>. Nunca aparecen O, I, 0 ni 1. Algunas imágenes tienen 6 caracteres y otras 5.', 'No importa si escribes en mayúscula o minúscula.', 'Si no logras leerla, déjala en blanco y sigue. No adivines al azar.', 'No uses ayuda externa ni zoom con otras herramientas. Hazlo de corrido, sin pausas.'],
+  libreria: ['Son <b>4 letras mayúsculas</b> (A–Z). Aquí sí pueden aparecer la I y la O.', 'No importa si escribes en mayúscula o minúscula.', 'Si no logras leerla, déjala en blanco y sigue. Si dudas entre dos letras, escribe la que creas más probable.', 'No uses ayuda externa ni zoom con otras herramientas. Hazlo de corrido, sin pausas.'],
+  libreria2: ['Son <b>4 dígitos</b> (0–9). Algunos son pequeños, están con trazo fino o están cruzados por líneas.', 'Si no logras leerla, déjala en blanco y sigue. Si dudas, escribe tu mejor lectura.', 'No uses ayuda externa ni zoom con otras herramientas. Hazlo de corrido, sin pausas.']
+};
+const TITLES = {niveles:['Cinco niveles de dificultad','Estudio breve · 5 a 8 minutos'], entornos:['Entornos nuevos','Estudio breve · 5 a 8 minutos'], libreria:['Librería real: letras','Estudio breve · unos 4 minutos'], libreria2:['Librería real: dígitos','Estudio breve · unos 4 minutos']};
+if (SETKEY) {
+  $('intro').querySelector('h1').textContent = TITLES[SETKEY][0];
+  $('intro').querySelector('.label').textContent = TITLES[SETKEY][1];
+  $('intro').querySelector('ul').innerHTML = RULES[SETKEY].map(t => '<li>' + t + '</li>').join('');
+  $('intro').querySelector('p.note').innerHTML = NOTE;
+  $('intro').hidden = false;
+} else { $('menu').hidden = false; }
+let saved = {}; try { saved = JSON.parse(localStorage.getItem('captchaDone') || '{}'); } catch (e) {}
+document.querySelectorAll('.opt').forEach(a => { if (saved[a.dataset.k]) a.classList.add('done'); });
+try { const n0 = localStorage.getItem('captchaName'), a0 = localStorage.getItem('captchaAge'); if (n0 && $('pname')) $('pname').value = n0; if (a0 && $('page')) $('page').value = a0; } catch (e) {}
+
 let i = 0, t0 = 0, pid = "", age = "", out = [];
 function show(id){["intro","task","done"].forEach(s => $(s).hidden = s !== id)}
 function load(){
@@ -125,6 +164,7 @@ function submit(){
 function finish(){
   $("prog").style.width = "100%";
   $("code").value = (LIB2 ? "CAPTCHA4|" : LIB ? "CAPTCHA3|" : ENV ? "CAPTCHA2|" : "CAPTCHA1|") + pid + "|" + age + "|" + out.join(";");
+  try { saved[SETKEY || "niveles"] = 1; localStorage.setItem("captchaDone", JSON.stringify(saved)); } catch (e) {}
   show("done");
 }
 $("start").onclick = () => {
@@ -133,7 +173,9 @@ $("start").onclick = () => {
   const err = $("err");
   if (n.length < 4 || n.split(" ").length < 2) { err.textContent = "Escribe tu nombre y apellido."; err.hidden = false; $("pname").focus(); return; }
   if (!(a >= 18 && a <= 110)) { err.textContent = "Solo pueden participar personas mayores de 18 años. Escribe tu edad en años, con números."; err.hidden = false; $("page").focus(); return; }
-  err.hidden = true; pid = n; age = String(a); show("task"); load();
+  err.hidden = true; pid = n; age = String(a);
+  try { localStorage.setItem("captchaName", n); localStorage.setItem("captchaAge", age); } catch (e) {}
+  show("task"); load();
 };
 $("next").onclick = submit;
 $("ans").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); submit(); } });
