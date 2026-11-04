@@ -27,6 +27,3 @@ All images: 32-symbol alphabet (no I, O, 0, 1), 5 characters (6 in E2), 310×80 
 ## Notes
 - CRNN training is not seeded; two 60-epoch runs gave different accuracies (see `crnn_levels_run1.csv`, `crnn_levels_run2.csv`).
 - Synthetic CAPTCHAs only; no real site was accessed.
-
-## Real-data check (exploratory)
-`results/real_sample/` holds results on 40 random images (seed 2026) from the public dataset [roncuevas/Captchas](https://github.com/roncuevas/Captchas) (MIT license; real 3-character text CAPTCHAs; provenance: collected from a web application, per its authors). `sample_ids.csv` lists the image hashes and labels; the images are not redistributed here. Only Tesseract and the multimodal model were tested on this sample (CRNN and humans were not).
