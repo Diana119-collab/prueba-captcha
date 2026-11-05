@@ -195,6 +195,7 @@ def mode_synthetic(a, device):
     print(f"Generando {a.n_train} CAPTCHAs de entrenamiento...", flush=True)
     Xtr, ytr = gen_dataset(a.n_train, seed0=10_000_000)  # semillas distintas a las de prueba
     seeds = [int(x) for x in a.seeds.split(",")] if a.seeds else [None]
+    os.makedirs(a.outdir, exist_ok=True)  # e.g. a Google Drive folder, so nothing is lost if the Colab session closes
     targets = [(a.test_dir, "crnn_levels")] + ([(a.env_dir, "crnn_environments")] if a.env_dir else []) \
               + ([(a.lib_dir, "crnn_library")] if a.lib_dir else []) + ([(a.lib2_dir, "crnn_library2")] if a.lib2_dir else [])
     summary = []
@@ -208,14 +209,15 @@ def mode_synthetic(a, device):
         line = {"seed": sd}
         for d, base in targets:
             rows = eval_dir(model, d, device)
-            out = f"{base}{tag}.csv"
+            out = os.path.join(a.outdir, f"{base}{tag}.csv")
             with open(out, "w", newline="") as f:
                 w = csv.DictWriter(f, fieldnames=rows[0].keys()); w.writeheader(); w.writerows(rows)
             report(rows)
             line[base] = sum(r["exacto"] for r in rows)
             print("Guardado:", out)
         summary.append(line)
-        with open("crnn_summary.csv", "w", newline="") as f:  # rewritten after every run, so nothing is lost if Colab stops
+        torch.save(model.state_dict(), os.path.join(a.outdir, f"crnn_model{tag}.pt"))
+        with open(os.path.join(a.outdir, "crnn_summary.csv"), "w", newline="") as f:  # rewritten after every run, so nothing is lost if Colab stops
             w = csv.DictWriter(f, fieldnames=summary[0].keys()); w.writeheader(); w.writerows(summary)
         print("Resumen hasta ahora:", summary, flush=True)
 
@@ -256,6 +258,7 @@ if __name__ == "__main__":
     ap.add_argument("--lib_dir", default=None, help="folder with the django-simple-captcha images + key.json (dataset/library)")
     ap.add_argument("--lib2_dir", default=None, help="second real-library set (dataset/library2)")
     ap.add_argument("--seeds", default=None, help="comma-separated seeds, e.g. 1,2,3,4,5: one training run per seed")
+    ap.add_argument("--outdir", default=".", help="where to write the CSVs and model weights (use a Drive folder in Colab)")
     ap.add_argument("--n_train", type=int, default=20000)
     ap.add_argument("--epochs", type=int, default=30)
     ap.add_argument("--selftest", action="store_true")
