@@ -53,10 +53,10 @@ a.back{font-size:.92rem;color:var(--muted)}
   <h1>Pruebas CAPTCHA</h1>
   <p>Lee el texto de imágenes CAPTCHA y escríbelo. Puedes hacer una sola prueba o las cuatro; cada una da un código distinto. <b>Usa el mismo nombre en todas.</b></p>
   <div class="menu">
-   <a class="opt" data-k="niveles" href="?set=niveles"><b>1. Dificultad creciente</b><span>30 imágenes de 5 caracteres, de más fáciles a más difíciles · 5 a 8 minutos</span></a>
-   <a class="opt" data-k="entornos" href="?set=entornos"><b>2. Cambios de formato</b><span>30 imágenes con otras fuentes, 6 caracteres o colores invertidos · 5 a 8 minutos</span></a>
-   <a class="opt" data-k="libreria" href="?set=libreria"><b>3. Librería CAPTCHA: letras</b><span>20 imágenes de 4 letras · unos 4 minutos</span></a>
-   <a class="opt" data-k="libreria2" href="?set=libreria2"><b>4. Librería CAPTCHA: dígitos</b><span>20 imágenes de 4 dígitos, difíciles · unos 4 minutos</span></a>
+   <a class="opt" data-k="niveles" href="?set=niveles"><b>1. Cinco niveles de dificultad</b><span>30 imágenes, de más fáciles a más difíciles · 5 a 8 minutos</span></a>
+   <a class="opt" data-k="entornos" href="?set=entornos"><b>2. Entornos nuevos</b><span>Otras fuentes, 6 caracteres, colores invertidos · 30 imágenes · 5 a 8 minutos</span></a>
+   <a class="opt" data-k="libreria" href="?set=libreria"><b>3. Librería real 1: CAPTCHA conformado por letras</b><span>20 imágenes de 4 letras · unos 4 minutos</span></a>
+   <a class="opt" data-k="libreria2" href="?set=libreria2"><b>4. Librería real 2: CAPTCHA conformado por dígitos</b><span>20 imágenes de 4 dígitos, difíciles · unos 4 minutos</span></a>
   </div>
   <p class="note"><b>Solo participan personas mayores de 18 años.</b> Se usan solo en este trabajo académico; en el trabajo solo se reportan resultados del grupo, sin nombres.</p>
  </section>
@@ -134,7 +134,7 @@ const RULES = {
   libreria: ['Son <b>4 letras mayúsculas</b> (A–Z). Aquí sí pueden aparecer la I y la O.', 'No importa si escribes en mayúscula o minúscula.', 'Si no logras leerla, déjala en blanco y sigue. Si dudas entre dos letras, escribe la que creas más probable.', 'No uses ayuda externa ni zoom con otras herramientas. Hazlo de corrido, sin pausas.'],
   libreria2: ['Son <b>4 dígitos</b> (0–9). Algunos son pequeños, están con trazo fino o están cruzados por líneas.', 'Si no logras leerla, déjala en blanco y sigue. Si dudas, escribe tu mejor lectura.', 'No uses ayuda externa ni zoom con otras herramientas. Hazlo de corrido, sin pausas.']
 };
-const TITLES = {niveles:['Dificultad creciente','Estudio breve · 5 a 8 minutos'], entornos:['Cambios de formato','Estudio breve · 5 a 8 minutos'], libreria:['Librería CAPTCHA: letras','Estudio breve · unos 4 minutos'], libreria2:['Librería CAPTCHA: dígitos','Estudio breve · unos 4 minutos']};
+const TITLES = {niveles:['Cinco niveles de dificultad','Estudio breve · 5 a 8 minutos'], entornos:['Entornos nuevos','Estudio breve · 5 a 8 minutos'], libreria:['Librería real 1: CAPTCHA de letras','Estudio breve · unos 4 minutos'], libreria2:['Librería real 2: CAPTCHA de dígitos','Estudio breve · unos 4 minutos']};
 if (SETKEY) {
   $('intro').querySelector('h1').textContent = TITLES[SETKEY][0];
   $('intro').querySelector('.label').textContent = TITLES[SETKEY][1];
